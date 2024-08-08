@@ -1,13 +1,36 @@
 apply plugin: 'com.android.library'
 
-ext {
-    isLibrary = true
-    pomPackaging = "aar"
-    pomArtifactId = "core"
-    pomName = "Barcode Scanner View"
-    pomDescription = 'An android library project which contains the core barcode scanner view'
+
+android {
+    compileSdkVersion Android.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion Android.minSdkVersion
+        targetSdkVersion Android.targetSdkVersion
+        versionCode Android.versionCode
+        versionName Android.versionName
+    }
+    namespace "me.dm7.barcodescanner.core"
+    buildTypes {
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDir 'jniLibs'
+        }
+    }
+    android {
+        lintOptions {
+            abortOnError false
+        }
+    }
 }
 
 dependencies {
-    implementation libraries.support_v4
+    implementation "androidx.appcompat:appcompat:1.6.1"
 }
