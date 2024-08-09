@@ -7,19 +7,38 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath 'com.android.tools.build:gradle:7.4.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${Version.kotlinVersion}"
-
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
 
 allprojects {
+
+    def localProperties = new Properties()
+    localProperties.load(new FileInputStream(rootProject.file("local.properties"))) //Set env variable GPR_USER & GPR_API_KEY if not adding a properties file
+
     repositories {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven {
+            name = "GitHubPackages"
+            /*  Configure path to the library hosted on GitHub Packages Registry
+             *  Replace UserID with package owner userID and REPOSITORY with the repository name
+             *  e.g. "https://maven.pkg.github.com/enefce/AndroidLibraryForGitHubPackagesDemo"*/
+
+            url = uri("https://maven.pkg.github.com/BzbsAndroid/barcodescanner")
+            credentials {
+                /** Create github.properties in root project folder file with
+                 ** gpr.usr=GITHUB_USER_ID & gpr.key=PERSONAL_ACCESS_TOKEN
+                 ** Or set env variable GPR_USER & GPR_API_KEY if not adding a properties file**/
+
+                username = localProperties['gpr.usr'] ?: System.getenv("GPR_USER")
+                password = localProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
+            }
+        }
     }
 }
 

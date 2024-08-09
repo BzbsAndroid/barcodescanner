@@ -36,6 +36,7 @@ android {
         debug.java.srcDirs += 'src/debug/kotlin'
         release.java.srcDirs += 'src/release/kotlin'
     }
+
     signingConfigs {
         debug {
         }
