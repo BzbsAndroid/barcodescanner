@@ -3,8 +3,9 @@ package me.dm7.barcodescanner.zbar.sample;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
+import android.os.Bundle;;
+
+import androidx.fragment.app.DialogFragment;
 
 public class MessageDialogFragment extends DialogFragment {
     public interface MessageDialogListener {

@@ -1,15 +1,105 @@
 apply plugin: 'com.android.library'
-
+apply plugin: 'maven-publish'
 ext {
-    isLibrary = true
-    pomPackaging = "aar"
-    pomArtifactId = "zxing"
-    pomName = "ZXing Scanner View"
-    pomDescription = 'An android library project which contains the zxing barcode scanner view'
+    versionMajor = 1
+    versionMinor = 9
+    versionPatch = 13
+    mGroupId = "me.buzzebees.barcodescanner"
+    mArtifactId = "zxing"
+    mVersionCode = Android.versionCode
+    mVersionName = generateVersionName(versionMajor, versionMinor, versionPatch)
+    mLibraryName = "Barcode Scanner"
+    mLibraryDescription = "Barcode Scanner zxing Library"
+}
+
+def static generateVersionCode() {
+    return (System.currentTimeMillis() / 1000).toInteger()
+}
+
+def static generateVersionName(versionMajor, versionMinor, versionPatch) {
+    String versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+    return "${versionName}"
+}
+android {
+    compileSdkVersion Android.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion Android.minSdkVersion
+        targetSdkVersion Android.targetSdkVersion
+        versionCode Android.versionCode
+        versionName Android.versionName
+    }
+
+    namespace "me.dm7.barcodescanner.zxing"
+    buildTypes {
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDir 'jniLibs'
+        }
+    }
+    android {
+        lintOptions {
+            abortOnError false
+        }
+    }
 }
 
 dependencies {
-//    api project(":core")
-    api libraries.barcodescanner_core
-    api libraries.zxing_core
+    api "me.buzzebees.barcodescanner:core:1.9.13"
+    api "com.google.zxing:core:3.4.1"
+    api fileTree(dir: 'libs', include: '*.jar')
 }
+// 3. Declare task for creation of android sources.
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties"))) //Set env variable GPR_USER & GPR_API_KEY if not adding a properties file
+
+// 4. Make configuration for publishing artifact.
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId mGroupId
+                artifactId mArtifactId
+                version mVersionName
+
+                from components.release
+
+                artifact androidSourcesJar
+
+                pom {
+                    name = mLibraryName
+                    description = mLibraryDescription
+                }
+            }
+        }
+
+        // 5. Update repository details and credentials.
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/BzbsAndroid/barcodescanner")
+                credentials {
+                    username = localProperties['gpr.usr'] ?: System.getenv("GPR_USER")
+                    password = localProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
+                }
+            }
+        }
+    }
+    // Generate .pom file with transitive dependencies
+
+}
+
+// Assembling should be performed before publishing package
+publish.dependsOn assemble

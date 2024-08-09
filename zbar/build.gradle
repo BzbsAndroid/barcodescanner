@@ -1,15 +1,39 @@
 apply plugin: 'com.android.library'
 
-ext {
-    isLibrary = true
-    pomPackaging = "aar"
-    pomArtifactId = "zbar"
-    pomName = "ZBar Scanner View"
-    pomDescription = 'An android library project which contains the zbar barcode scanner view'
+
+android {
+    compileSdkVersion Android.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion Android.minSdkVersion
+        targetSdkVersion Android.targetSdkVersion
+        versionCode Android.versionCode
+        versionName Android.versionName
+    }
+    namespace "me.dm7.barcodescanner.zbar"
+
+    buildTypes {
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDir 'jniLibs'
+        }
+    }
+    android {
+        lintOptions {
+            abortOnError false
+        }
+    }
 }
 
+
 dependencies {
-//    api project(":core")
-    api libraries.barcodescanner_core
+    api project(":core")
     api fileTree(dir: 'libs', include: '*.jar')
 }

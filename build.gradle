@@ -1,149 +1,47 @@
-apply from: 'dependencies.gradle'
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
     repositories {
-        jcenter()
         google()
-    }
+        mavenCentral()
 
+    }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath 'com.android.tools.build:gradle:7.4.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${Version.kotlinVersion}"
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
     }
 }
 
 allprojects {
-    group = 'me.dm7.barcodescanner'
-    version = '1.9.13'
+
+    def localProperties = new Properties()
+    localProperties.load(new FileInputStream(rootProject.file("local.properties"))) //Set env variable GPR_USER & GPR_API_KEY if not adding a properties file
 
     repositories {
         google()
-        jcenter()
-    }
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        maven {
+            name = "GitHubPackages"
+            /*  Configure path to the library hosted on GitHub Packages Registry
+             *  Replace UserID with package owner userID and REPOSITORY with the repository name
+             *  e.g. "https://maven.pkg.github.com/enefce/AndroidLibraryForGitHubPackagesDemo"*/
 
-    ext {
-        isLibrary = false
-    }
-}
+            url = uri("https://maven.pkg.github.com/BzbsAndroid/barcodescanner")
+            credentials {
+                /** Create github.properties in root project folder file with
+                 ** gpr.usr=GITHUB_USER_ID & gpr.key=PERSONAL_ACCESS_TOKEN
+                 ** Or set env variable GPR_USER & GPR_API_KEY if not adding a properties file**/
 
-subprojects {
-    afterEvaluate { Project project ->
-        ext.pluginContainer = project.getPlugins()
-        if(ext.pluginContainer.hasPlugin("com.android.application") || ext.pluginContainer.hasPlugin("com.android.library")) {
-            android {
-                compileSdkVersion versions.compile_sdk
-                buildToolsVersion versions.build_tools
-
-                android {
-                    lintOptions {
-                        abortOnError false
-                    }
-                }
-
-                defaultConfig {
-                    minSdkVersion versions.min_sdk
-                    targetSdkVersion versions.target_sdk
-                    versionCode 1913
-                    versionName "1.9.13"
-                }
-            }
-        }
-
-        Properties properties = new Properties()
-        properties.load(project.rootProject.file('local.properties').newDataInputStream())
-        def bintrayUser = properties.getProperty('bintray.user')
-        def bintrayApikey = properties.getProperty('bintray.apikey')
-
-        if(project.isLibrary && bintrayUser?.trim() && bintrayApikey?.trim()) {
-            configure(project) {
-                apply plugin: 'com.github.dcendents.android-maven'
-                group = project.group                               // Maven Group ID for the artifact
-
-                install {
-                    repositories.mavenInstaller {
-                        pom.project {
-                            name project.pomName
-                            version project.version
-                            groupId project.group
-                            packaging project.pomPackaging
-                            artifactId project.pomArtifactId
-                            description project.pomDescription
-                            url 'https://github.com/dm77/barcodescanner'
-
-                            scm {
-                                url 'scm:git@github.com:dm77/barcodescanner.git'
-                                connection 'scm:git@github.com:dm77/barcodescanner.git'
-                                developerConnection 'scm:git@github.com:dm77/barcodescanner.git'
-                            }
-
-                            licenses {
-                                license {
-                                    name 'The Apache Software License, Version 2.0'
-                                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                                    distribution 'repo'
-                                }
-                            }
-
-                            developers {
-                                developer {
-                                    id 'dm77'
-                                    name 'Dushyanth Maguluru'
-                                    email 'dushyanth.maguluru@gmail.com'
-                                }
-                            }
-                        }
-                    }
-                }
-
-                apply plugin: 'com.jfrog.bintray'
-
-                version = '1.9.13'
-
-                if (project.hasProperty("android")) { // Android libraries
-                    task sourcesJar(type: Jar) {
-                        classifier = 'sources'
-                        from android.sourceSets.main.java.srcDirs
-                    }
-                } else { // Java libraries
-                    task sourcesJar(type: Jar, dependsOn: classes) {
-                        classifier = 'sources'
-                        from sourceSets.main.allSource
-                    }
-                }
-
-
-                artifacts {
-                    archives sourcesJar
-                }
-
-                bintray {
-                    user = properties.getProperty("bintray.user")
-                    key = properties.getProperty("bintray.apikey")
-
-                    configurations = ['archives']
-                    pkg {
-                        repo = 'maven'
-                        name = 'me.dm7.barcodescanner:' + project.pomArtifactId
-                        desc = 'Barcode Scanner Libraries for Android'
-                        websiteUrl = 'https://github.com/dm77/barcodescanner'
-                        vcsUrl = 'https://github.com/dm77/barcodescanner.git'
-                        licenses = ["Apache-2.0"]
-                        publish = true
-                        publicDownloadNumbers = true
-                        version {
-                            desc = 'Barcode Scanner Libraries for Android'
-                            gpg {
-                                sign = false
-                            }
-                        }
-                    }
-                }
+                username = localProperties['gpr.usr'] ?: System.getenv("GPR_USER")
+                password = localProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
             }
         }
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.10.1'
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
